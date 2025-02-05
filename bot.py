@@ -17,7 +17,7 @@ from discord.ext import commands
 # Reads the token from an environment variable, falling back to a placeholder string
 TOKEN = os.getenv("DISCORD_BOT_TOKEN", "YOUR_BOT_TOKEN_HERE")
 
-GUILD_ID = os.getenv("DISCORD_GUILD_ID", "YOUR_GUILD_ID_HERE")
+GUILD_ID = int(os.getenv("DISCORD_GUILD_ID", "YOUR_GUILD_ID_HERE"))
 
 # Role IDs (example IDs)
 ROLE_DEFAULT_ID = 1078825365306355712
