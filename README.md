@@ -1,7 +1,6 @@
 # Dota Queue Bot
 
-A Discord bot for organizing Dota queues, daily MMR rewards, and trivia games.  
-It uses a **CSV** file to store user MMR, and **heroStats.json** data for hero info.  
+A Discord bot for organizing Dota queues, daily MMR (bot currency) rewards, and trivia games.  
 The bot includes multiple commands for starting queues, checking MMR, showing top MMR holders,  
 and running two types of trivia:  
 - **Match Trivia** (Radiant vs. Dire, guess winner)  
