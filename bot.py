@@ -346,7 +346,7 @@ async def D(ctx):
             f"Try again in **{hours}h {minutes}m {seconds}s**."
         )
 
-@bot.command(aliases=['mmr','MMR'])
+@bot.command(aliases=['mmr'])
 async def MMR(ctx):
     user_id = str(ctx.author.id)
     data = load_currency_data()
