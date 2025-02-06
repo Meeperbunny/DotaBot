@@ -345,7 +345,7 @@ async def mmr(ctx):
         f"{ctx.author.mention}, you have **{record['currency']}🔸**"
     )
 
-@bot.command(aliases=['top'])
+@bot.command(aliases=['TOP'])
 async def top(ctx):
     """
     Shows a leaderboard of top 10 points and top 10 streaks.
