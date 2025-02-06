@@ -1,6 +1,6 @@
 # DotaBot
 
-DotaBot is a simple Discord bot for organizing Dota 2 games within a community. It helps players organize queues, get daily rewards, and start matches faster.
+DotaBot is a simple Discord bot for organizing Dota 2 games. It streamlines organizing queues and start matches faster.
 
 ## Invite Link
 Use this link to add the bot to your server: [Install Link](https://discord.com/oauth2/authorize?client_id=1336990172767846501)
