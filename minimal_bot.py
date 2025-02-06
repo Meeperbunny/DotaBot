@@ -228,11 +228,11 @@ async def help(ctx):
             "`!battlecup (!bc)` - Battle Cup queue\n"
             "`!inhouse (!ih)` - Inhouse queue\n\n"
             "**Currency Commands**\n"
-            "`!daily (!d)` - Claim daily reward\n"
-            "`!mmr` - Check your points\n"
-            "`!top` - Leaderboard\n\n"
+            "`!daily (!d)` - Claim daily rewards\n"
+            "`!mmr` - See your points\n"
+            "`!top` - Streak and point leaderboard\n\n"
             "**Role Command**\n"
-            "`!role` - Create/store the queue role and assign it to you.\n"
+            "`!role` - Assign yourself with the queue role\n"
         ),
         color=discord.Color.green()
     )
@@ -262,23 +262,23 @@ async def role(ctx):
 
 @bot.command(aliases=["q", "u"])
 async def queue(ctx):
-    await send_queue_embed(ctx, "⚔️ Unranked Queue by {sender}", EMOJI_QUEUE)
+    await send_queue_embed(ctx, "⚔️ Unranked Queue started by {sender} ⚔️", EMOJI_QUEUE)
 
 @bot.command(aliases=["r"])
 async def ranked(ctx):
-    await send_queue_embed(ctx, "📈 Ranked Queue by {sender}", EMOJI_RANKED)
+    await send_queue_embed(ctx, "📈 Ranked Queue started by {sender} 📈", EMOJI_RANKED)
 
 @bot.command(aliases=["t"])
 async def turbo(ctx):
-    await send_queue_embed(ctx, "⏩ Turbo by {sender}", EMOJI_TURBO)
+    await send_queue_embed(ctx, "⏩ Turbo Queue by {sender} ⏩", EMOJI_TURBO)
 
 @bot.command(aliases=["bc"])
 async def battlecup(ctx):
-    await send_queue_embed(ctx, "🏆 Battle Cup by {sender}", EMOJI_BC)
+    await send_queue_embed(ctx, "🏆 Battle Cup Queue started by {sender} 🏆", EMOJI_BC)
 
 @bot.command(aliases=["ih"])
 async def inhouse(ctx):
-    await send_queue_embed(ctx, "🏠 Inhouse by {sender}", EMOJI_IH)
+    await send_queue_embed(ctx, "🏠 Inhouse started by {sender} 🏠", EMOJI_IH)
 
 @bot.command(aliases=["d"])
 async def daily(ctx):
