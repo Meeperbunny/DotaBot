@@ -581,3 +581,4 @@ async def trivia(ctx):
 if __name__ == "__main__":
     # MAKE SURE to set your environment variable or replace "YOUR_BOT_TOKEN_HERE"
     bot.run(TOKEN)
+    
