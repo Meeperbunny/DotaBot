@@ -20,8 +20,7 @@ Use this link to add the bot to your server: [Install Link](https://discord.com/
   - `!top` - View top point and streak holders  
 
 - **Role Management**  
-  - `!role` - Creates or finds the `queue` role and assigns it to you  
-  - The bot automatically ensures `queue` role exists on server join  
+  - `!role` - Gives you the `queue` role  
 
 ## Installation
 1. Clone or download this repository.
