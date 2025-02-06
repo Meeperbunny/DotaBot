@@ -229,7 +229,7 @@ async def help(ctx):
             "`!inhouse (!ih)` - Inhouse queue\n\n"
             "**Currency Commands**\n"
             "`!daily (!d)` - Claim daily rewards\n"
-            "`!mmr` - See your points\n"
+            "`!my` - See your points\n"
             "`!top` - Streak and point leaderboard\n\n"
             "**Role Command**\n"
             "`!role` - Assign yourself with the queue role\n"
@@ -332,7 +332,7 @@ async def daily(ctx):
     )
 
 @bot.command()
-async def mmr(ctx):
+async def my(ctx):
     """
     Shows the user's current currency/points.
     """
