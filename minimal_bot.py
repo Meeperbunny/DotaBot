@@ -129,7 +129,7 @@ reaction_thresholds = {
     "🏠": (11, "🏠 Inhouse 🏠"),
 }
 
-# Create bot with all intents (be sure to adjust your intents in Discord Developer Portal if needed)
+# Create bot with all intents
 intents = discord.Intents.all()
 bot = commands.Bot(command_prefix="!", intents=intents, help_command=None, case_insensitive=True)
 
