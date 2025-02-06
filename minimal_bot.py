@@ -130,7 +130,7 @@ reaction_thresholds = {
 }
 
 # Create bot with all intents (be sure to adjust your intents in Discord Developer Portal if needed)
-intents = 268437568 # Manage roles, send messages, add reactions.
+intents = discord.Intents.all()
 bot = commands.Bot(command_prefix="!", intents=intents, help_command=None, case_insensitive=True)
 
 @bot.event
