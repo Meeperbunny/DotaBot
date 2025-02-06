@@ -7,7 +7,7 @@ import zoneinfo
 import discord
 from discord.ext import commands
 
-TOKEN = os.getenv("DISCORD_BOT_TOKEN", "YOUR_BOT_TOKEN_HERE")
+TOKEN = os.getenv("DOTABOT_APP_ID")
 
 EMOJI_QUEUE  = "⚔️"
 EMOJI_RANKED = "📈"
