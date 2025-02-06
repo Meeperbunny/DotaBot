@@ -18,7 +18,7 @@ EMOJI_CANCEL = "❌"
 
 DAILY_REWARD = 25
 
-CACHE_DIR = os.path.join(tempfile.gettempdir(), "dotabot-cache")
+CACHE_DIR = os.path.join(tempfile.gettempdir(), "dotabotcache")
 os.makedirs(CACHE_DIR, exist_ok=True)
 
 CURRENCY_FILE = os.path.join(CACHE_DIR, "currency.csv")
