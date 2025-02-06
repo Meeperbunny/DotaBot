@@ -26,55 +26,8 @@ ROLE_FILE = os.path.join(CACHE_DIR, "role_ids.csv")
 
 LOCAL_ZONE = zoneinfo.ZoneInfo("America/Los_Angeles")
 
-def load_currency_data():
-    """
-    {
-      server_id: {
-        user_id: {
-          'currency': int,
-          'last_claim_date': 'YYYY-MM-DD' or 'none',
-          'streak': int
-        }
-      }
-    }
-    """
-    data = {}
-    if os.path.exists(CURRENCY_FILE):
-        with open(CURRENCY_FILE, "r", newline="") as f:
-            reader = csv.DictReader(f)
-            for row in reader:
-                sid = row["server_id"]
-                uid = row["user_id"]
-                if sid not in data:
-                    data[sid] = {}
-                data[sid][uid] = {
-                    "currency": int(row["currency"]),
-                    "last_claim_date": row["last_claim_date"],
-                    "streak": int(row["streak"])
-                }
-    return data
-
-def save_currency_data(data):
-    with open(CURRENCY_FILE, "w", newline="") as f:
-        writer = csv.DictWriter(
-            f,
-            fieldnames=["server_id", "user_id", "currency", "last_claim_date", "streak"]
-        )
-        writer.writeheader()
-        for server_id, user_dict in data.items():
-            for user_id, record in user_dict.items():
-                writer.writerow({
-                    "server_id": server_id,
-                    "user_id": user_id,
-                    "currency": record["currency"],
-                    "last_claim_date": record["last_claim_date"],
-                    "streak": record["streak"]
-                })
-
 def load_role_data():
-    """
-    { server_id: role_id }
-    """
+    """ { server_id: role_id } """
     data = {}
     if os.path.exists(ROLE_FILE):
         with open(ROLE_FILE, "r", newline="") as f:
@@ -90,27 +43,20 @@ def save_role_data(data):
         for sid, rid in data.items():
             writer.writerow({"server_id": sid, "role_id": rid})
 
-def get_now_local():
-    return datetime.now(LOCAL_ZONE)
+async def get_or_create_queue_role(guild):
+    """Ensures the 'queue' role exists in the server, creates it if missing, and updates storage."""
+    roles_data = load_role_data()
+    guild_id = str(guild.id)
 
-def get_today_str():
-    return get_now_local().strftime("%Y-%m-%d")
+    existing_role_id = roles_data.get(guild_id)
+    role_obj = discord.utils.get(guild.roles, id=int(existing_role_id)) if existing_role_id else None
 
-def get_time_until_next_midnight():
-    now_local = get_now_local()
-    next_midnight = (now_local + timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
-    diff = int((next_midnight - now_local).total_seconds())
-    hours, rem = divmod(diff, 3600)
-    minutes, _ = divmod(rem, 60)
-    return hours, minutes
+    if not role_obj:
+        role_obj = await guild.create_role(name="queue", mentionable=True)
+        roles_data[guild_id] = str(role_obj.id)
+        save_role_data(roles_data)
 
-reaction_thresholds = {
-    "🏆": (6, "🏆 Battle Cup 🏆"),
-    "⚔️": (6, "⚔️ Queue ⚔️"),
-    "📈": (6, "📈 Ranked 📈"),
-    "⏩": (6, "⏩ Turbo ⏩"),
-    "🏠": (11, "🏠 Inhouse 🏠"),
-}
+    return role_obj
 
 intents = discord.Intents.all()
 bot = commands.Bot(command_prefix="!", intents=intents, help_command=None)
@@ -119,38 +65,30 @@ bot = commands.Bot(command_prefix="!", intents=intents, help_command=None)
 async def on_ready():
     print(f"Logged in as {bot.user} in {len(bot.guilds)} server(s).")
     for guild in bot.guilds:
-        print(f"- {guild.name} (ID: {guild.id})")
+        await get_or_create_queue_role(guild)
 
 @bot.event
-async def on_reaction_add(reaction, user):
-    if reaction.message.author.id != bot.user.id or user.bot:
-        return
-    threshold, header_title = reaction_thresholds.get(str(reaction.emoji), (None, None))
-    if threshold and reaction.count == threshold:
-        await send_reply_msg(header_title, reaction)
+async def on_guild_join(guild):
+    """Automatically create a 'queue' role when joining a new server."""
+    await get_or_create_queue_role(guild)
 
-async def send_reply_msg(header_msg, reaction):
-    embed = discord.Embed(title=header_msg, color=discord.Color.teal())
-    participants = []
-    async for usr in reaction.users():
-        if not usr.bot:
-            participants.append(usr.name)
-    if participants:
-        embed.add_field(name="Participants", value=", ".join(participants), inline=True)
-    else:
-        embed.add_field(name="Participants", value="None", inline=True)
-    await reaction.message.reply(embed=embed)
+async def send_queue_embed(ctx, title_template, emoji):
+    """Sends a queue embed and pings the @queue role."""
+    guild_id = str(ctx.guild.id)
+    roles_data = load_role_data()
+    role_id = roles_data.get(guild_id)
+    role_obj = discord.utils.get(ctx.guild.roles, id=int(role_id)) if role_id else None
 
-async def send_queue_embed(ctx, title_template, emoji, role_obj, color=discord.Color.purple()):
     sender = ctx.author.display_name
     embed = discord.Embed(
         title=title_template.format(sender=sender),
         description="React to join",
-        color=color
+        color=discord.Color.purple()
     )
     msg = await ctx.send(embed=embed)
     await msg.add_reaction(emoji)
     await msg.add_reaction(EMOJI_CANCEL)
+
     if role_obj:
         await ctx.send(role_obj.mention)
 
@@ -159,14 +97,15 @@ async def help(ctx):
     embed = discord.Embed(
         title="DotaBot Commands",
         description=(
+            "!role           - Get the queue role\n"
             "!q !queue       - Start an Unranked queue\n"
             "!r !ranked      - Start a Ranked queue\n"
-            "!t !turbo       - Start a Turbo queue"
+            "!t !turbo       - Start a Turbo queue\n"
             "!bc !battlecup  - Start a Battle Cup queue\n"
+            "!ih !inhouse    - Start an Inhouse queue\n"
             "!d !daily       - Claim your daily reward\n"
             "!mmr            - Check your points\n"
             "!top            - Show top point/streak holders\n"
-            "!ih !inhouse    - Start an Inhouse queue\n"
         ),
         color=discord.Color.green()
     )
@@ -174,108 +113,30 @@ async def help(ctx):
 
 @bot.command()
 async def role(ctx):
-    """Create or find a 'queue' role, store ID, and assign it to the user."""
-    guild_id = str(ctx.guild.id)
-    roles_data = load_role_data()
-    existing_role_id = roles_data.get(guild_id)
-
-    role_obj = None
-    if existing_role_id:
-        role_obj = discord.utils.get(ctx.guild.roles, id=int(existing_role_id))
-
-    # Create if not found
-    if not role_obj:
-        role_obj = await ctx.guild.create_role(name="queue", mentionable=True)
-        roles_data[guild_id] = str(role_obj.id)
-        save_role_data(roles_data)
-
+    """Assign the 'queue' role to the user."""
+    role_obj = await get_or_create_queue_role(ctx.guild)
     await ctx.author.add_roles(role_obj)
     await ctx.send(f"{ctx.author.mention} was assigned to {role_obj.mention}.")
 
 @bot.command(aliases=["q"])
 async def queue(ctx):
-    guild_id = str(ctx.guild.id)
-    roles_data = load_role_data()
-    role_id = roles_data.get(guild_id)
-    role_obj = discord.utils.get(ctx.guild.roles, id=int(role_id)) if role_id else None
-    await send_queue_embed(ctx, "⚔️ Queue by {sender}", EMOJI_QUEUE, role_obj)
+    await send_queue_embed(ctx, "⚔️ Queue by {sender}", EMOJI_QUEUE)
 
 @bot.command(aliases=["r"])
 async def ranked(ctx):
-    guild_id = str(ctx.guild.id)
-    roles_data = load_role_data()
-    role_id = roles_data.get(guild_id)
-    role_obj = discord.utils.get(ctx.guild.roles, id=int(role_id)) if role_id else None
-    await send_queue_embed(ctx, "📈 Ranked Queue by {sender}", EMOJI_RANKED, role_obj)
+    await send_queue_embed(ctx, "📈 Ranked Queue by {sender}", EMOJI_RANKED)
 
 @bot.command(aliases=["t"])
 async def turbo(ctx):
-    guild_id = str(ctx.guild.id)
-    roles_data = load_role_data()
-    role_id = roles_data.get(guild_id)
-    role_obj = discord.utils.get(ctx.guild.roles, id=int(role_id)) if role_id else None
-    await send_queue_embed(ctx, "⏩ Turbo by {sender}", EMOJI_TURBO, role_obj)
+    await send_queue_embed(ctx, "⏩ Turbo by {sender}", EMOJI_TURBO)
 
 @bot.command(aliases=["bc"])
 async def battlecup(ctx):
-    guild_id = str(ctx.guild.id)
-    roles_data = load_role_data()
-    role_id = roles_data.get(guild_id)
-    role_obj = discord.utils.get(ctx.guild.roles, id=int(role_id)) if role_id else None
-    await send_queue_embed(ctx, "🏆 Battle Cup by {sender}", EMOJI_BC, role_obj)
+    await send_queue_embed(ctx, "🏆 Battle Cup by {sender}", EMOJI_BC)
 
 @bot.command(aliases=["ih"])
 async def inhouse(ctx):
-    guild_id = str(ctx.guild.id)
-    roles_data = load_role_data()
-    role_id = roles_data.get(guild_id)
-    role_obj = discord.utils.get(ctx.guild.roles, id=int(role_id)) if role_id else None
-    await send_queue_embed(ctx, "🏠 Inhouse by {sender}", EMOJI_IH, role_obj)
-
-@bot.command(aliases=["d"])
-async def daily(ctx):
-    guild_id = str(ctx.guild.id)
-    user_id = str(ctx.author.id)
-    data = load_currency_data()
-
-    if guild_id not in data:
-        data[guild_id] = {}
-    if user_id not in data[guild_id]:
-        data[guild_id][user_id] = {
-            "currency": 0,
-            "last_claim_date": "none",
-            "streak": 0
-        }
-
-    record = data[guild_id][user_id]
-    today = get_today_str()
-
-    if record["last_claim_date"] == today:
-        hours, minutes = get_time_until_next_midnight()
-        await ctx.send(
-            f"{ctx.author.mention}, you've already claimed your daily. "
-            f"Try again in {hours} hours {minutes} minutes."
-        )
-        return
-
-    if record["last_claim_date"] != "none":
-        prev = datetime.strptime(record["last_claim_date"], "%Y-%m-%d").date()
-        curr = datetime.strptime(today, "%Y-%m-%d").date()
-        if (curr - prev).days == 1:
-            record["streak"] += 1
-        else:
-            record["streak"] = 1
-    else:
-        record["streak"] = 1
-
-    record["last_claim_date"] = today
-    record["currency"] += DAILY_REWARD
-    save_currency_data(data)
-
-    await ctx.send(
-        f"{ctx.author.mention}, daily reward claimed! "
-        f"You now have **{record['currency']}🔸** ({record['streak']} day streak)"
-    )
+    await send_queue_embed(ctx, "🏠 Inhouse by {sender}", EMOJI_IH)
 
 @bot.command()
 async def mmr(ctx):
