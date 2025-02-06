@@ -1,32 +1,36 @@
-# Dota Queue Bot
+# DotaBot
 
-A Discord bot for organizing Dota queues, daily MMR (bot currency) rewards, and trivia games.  
-The bot includes multiple commands for starting queues, checking MMR, showing top MMR holders,  
-and running two types of trivia:  
-- **Match Trivia** (Radiant vs. Dire, guess winner)  
-- **Hero Stats Over/Under** (guess if hero stat is higher or lower than shown)  
+DotaBot is a simple Discord bot for organizing Dota 2 games within a community. It helps players organize queues, get daily rewards, and start matches faster.
 
-## Quick Features
+## Invite Link
+Use this link to add the bot to your server: [Install Link](https://discord.com/oauth2/authorize?client_id=1336990172767846501)
 
-- **Daily**: `!D`, `!daily`, `!d` - claim a daily 25 MMR reward, once every 23 hours.
-- **Queues**: `!Q`, `!R`, `!IH`, etc. - start Dota queues and mention roles.
-- **Trivia**: `!trivia` - 50% chance for Match Trivia, 50% for Hero Stats Over/Under.  
-  - Double down (±10 MMR) or normal (±5 MMR).
-- **MMR**: `!mmr` / `!MMR` - check how much MMR you have; `!top` / `!topmmr` - see top MMR holders.
+## Features
+- **Queue System**  
+  Commands to start different queue types:
+  - `!queue (!q)` - Unranked queue  
+  - `!ranked (!r)` - Ranked queue  
+  - `!turbo (!t)` - Turbo queue  
+  - `!battlecup (!bc)` - Battle Cup queue  
+  - `!inhouse (!ih)` - Inhouse queue  
 
-## How to Run
+- **Currency System**  
+  - `!daily (!d)` - Claim a daily reward  
+  - `!mmr` - Check your current points  
+  - `!top` - View top point and streak holders  
 
-1. **Set Up**  
-   - Clone the repo or copy the files.
-   - Install requirements (e.g. `discord.py`, `requests`).
+- **Role Management**  
+  - `!role` - Creates or finds the `queue` role and assigns it to you  
+  - The bot automatically ensures `queue` role exists on server join  
 
-2. **Token**  
-   - The bot reads your token from the environment variable `DISCORD_BOT_TOKEN`.
-   - Alternatively, replace `"YOUR_BOT_TOKEN_HERE"` in the code with your real token (not recommended for public repos).
-
-3. **heroStats.json**  
-   - If `heroStats.json` isn’t found locally or in the temp folder, it fetches from the OpenDota API.
-
-4. **Run**  
+## Installation
+1. Clone or download this repository.
+2. Install dependencies:
+   ```bash
+   pip install -U discord.py
+   ```
+3. Set the bot token as an environment variable (`DOTABOT_APP_ID`).
+4. Run the bot:
    ```bash
    python bot.py
+   ```
