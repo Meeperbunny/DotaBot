@@ -274,7 +274,7 @@ async def daily(ctx):
 
     await ctx.send(
         f"{ctx.author.mention}, daily reward claimed! "
-        f"You now have **{record['currency']}🔸**. Streak: {record['streak']} days in a row."
+        f"You now have **{record['currency']}🔸** ({record['streak']} day streak)"
     )
 
 @bot.command()
@@ -313,7 +313,7 @@ async def top(ctx):
     for i, (user_id, info) in enumerate(top_streaks, start=1):
         member = ctx.guild.get_member(int(user_id))
         name = member.display_name if member else f"User {user_id}"
-        streak_desc += f"{i}. {name} — **{info['streak']}🔥**\n"
+        streak_desc += f"{i}. {name} — **{info['streak']} 🔥**\n"
 
     embed = discord.Embed(title="Leaderboard", color=discord.Color.gold())
 
