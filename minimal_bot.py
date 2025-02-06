@@ -159,15 +159,14 @@ async def help(ctx):
     embed = discord.Embed(
         title="DotaBot Commands",
         description=(
-            "!bc !battlecup  - Start a Battle Cup\n"
-            "!d !daily       - Claim your daily reward\n"
-            "!mmr            - Check your points\n"
-            "!top            - Show top point holders\n"
-            "!trivia         - Unimplemented trivia\n"
-            "!ih !inhouse    - Start an Inhouse queue\n"
-            "!q !queue       - Start a regular queue\n"
+            "!q !queue       - Start an Unranked queue\n"
             "!r !ranked      - Start a Ranked queue\n"
             "!t !turbo       - Start a Turbo queue"
+            "!bc !battlecup  - Start a Battle Cup queue\n"
+            "!d !daily       - Claim your daily reward\n"
+            "!mmr            - Check your points\n"
+            "!top            - Show top point/streak holders\n"
+            "!ih !inhouse    - Start an Inhouse queue\n"
         ),
         color=discord.Color.green()
     )
@@ -293,15 +292,36 @@ async def top(ctx):
     guild_id = str(ctx.guild.id)
     data = load_currency_data()
     server_data = data.get(guild_id, {})
-    sorted_data = sorted(server_data.items(), key=lambda x: x[1]["currency"], reverse=True)
-    top_ten = sorted_data[:10]
-    desc = ""
-    for i, (user_id, info) in enumerate(top_ten, start=1):
+
+    if not server_data:
+        await ctx.send("No data available for this server.")
+        return
+
+    sorted_by_points = sorted(server_data.items(), key=lambda x: x[1]["currency"], reverse=True)
+    sorted_by_streak = sorted(server_data.items(), key=lambda x: x[1]["streak"], reverse=True)
+
+    top_points = sorted_by_points[:10]
+    top_streaks = sorted_by_streak[:10]
+
+    points_desc = ""
+    for i, (user_id, info) in enumerate(top_points, start=1):
         member = ctx.guild.get_member(int(user_id))
         name = member.display_name if member else f"User {user_id}"
-        desc += f"{i}. {name} — **{info['currency']}🔸**\n"
+        points_desc += f"{i}. {name} — **{info['currency']}🔸**\n"
 
-    embed = discord.Embed(title="Top Point Holders", description=desc, color=discord.Color.gold())
+    streak_desc = ""
+    for i, (user_id, info) in enumerate(top_streaks, start=1):
+        member = ctx.guild.get_member(int(user_id))
+        name = member.display_name if member else f"User {user_id}"
+        streak_desc += f"{i}. {name} — **{info['streak']}🔥**\n"
+
+    embed = discord.Embed(title="Leaderboard", color=discord.Color.gold())
+
+    if points_desc:
+        embed.add_field(name="Top Point Holders", value=points_desc, inline=False)
+    if streak_desc:
+        embed.add_field(name="Top Streak Holders", value=streak_desc, inline=False)
+
     await ctx.send(embed=embed)
 
 @bot.command()
